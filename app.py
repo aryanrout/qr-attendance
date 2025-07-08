@@ -11,10 +11,18 @@ if not os.path.exists(csv_file):
     pd.DataFrame(columns=["Name", "Date", "Time"]).to_csv(csv_file, index=False)
 
 # 🔁 Generate QR code based on today's date
+# Generate QR code based on today's date (with fix for Streamlit Cloud)
 def generate_qr():
     today_str = str(date.today())
     qr = qrcode.make(today_str)
-    return qr, today_str
+
+    # Convert image to byte stream
+    buf = io.BytesIO()
+    qr.save(buf, format="PNG")
+    buf.seek(0)
+    
+    return buf, today_str
+
 
 # 🎛 Admin Panel (QR generator)
 st.sidebar.title("Admin Panel")
