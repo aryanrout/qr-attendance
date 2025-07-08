@@ -21,20 +21,21 @@ if not os.path.exists(csv_file):
     pd.DataFrame(columns=["Name", "Date", "Time"]).to_csv(csv_file, index=False)
 
 # -------------------------------
-# 📷 QR Code Generator
+# 📷 QR Code Generator (URL-based QR)
 def generate_qr():
     today_str = str(date.today())
-    qr = qrcode.make(today_str)
+    # 👇 Replace this with your actual deployed Streamlit URL 👇
+    streamlit_url = "https://qr-attendance-yx4bifqxdnhwqp6w4hb9fm.streamlit.app/"
+    link = f"{streamlit_url}/?token={today_str}"
+    qr = qrcode.make(link)
     buf = io.BytesIO()
     qr.save(buf, format="PNG")
     buf.seek(0)
-    return buf, today_str
+    return buf, today_str, link
 
 # -------------------------------
 # 🧠 Main Logic Starts Here
-
 st.set_page_config(page_title="QR Attendance", page_icon="📚")
-
 st.title("📚 QR Attendance System with Login")
 
 # Session State for Login
@@ -59,36 +60,41 @@ if not st.session_state.logged_in:
             st.error("Invalid credentials.")
 
 # -------------------------------
-# Teacher Panel
+# 👨‍🏫 Teacher Panel
 elif st.session_state.role == "teacher":
     st.sidebar.title("👨‍🏫 Teacher Panel")
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
     
-    if st.sidebar.button("Generate Today's QR"):
-        qr_img, qr_token = generate_qr()
-        st.image(qr_img, caption="Scan to mark attendance")
-        st.success(f"QR for token: `{qr_token}`")
+    if st.sidebar.button("📸 Generate Today's QR Code"):
+        qr_img, qr_token, link = generate_qr()
+        st.image(qr_img, caption="📷 Scan to mark attendance")
+        st.success(f"✅ QR generated for token: `{qr_token}`")
+        st.info(f"🔗 Link inside QR: {link}")
 
     if st.sidebar.checkbox("📄 Show Attendance Record"):
         df = pd.read_csv(csv_file)
         st.dataframe(df)
 
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.rerun()
 
 # -------------------------------
-# Student Panel
+# 👨‍🎓 Student Panel
 elif st.session_state.role == "student":
     st.sidebar.title("👨‍🎓 Student Panel")
     st.sidebar.success(f"Logged in as: {st.session_state.username}")
 
-    st.subheader("📝 Enter Token and Name to Mark Attendance")
+    # 🧠 Auto-fetch token from URL
+    query_params = st.experimental_get_query_params()
+    default_token = query_params.get("token", [""])[0]
 
-    token = st.text_input("Enter Token from QR")
+    st.subheader("📝 Mark Your Attendance")
+
+    token = st.text_input("Token (auto-filled from QR)", value=default_token)
     name = st.text_input("Enter Your Name")
 
-    if st.button("Mark Attendance"):
+    if st.button("✅ Mark Attendance"):
         today_str = str(date.today())
         if token == today_str:
             current_time = datetime.now().strftime("%H:%M:%S")
@@ -102,6 +108,6 @@ elif st.session_state.role == "student":
         else:
             st.error("❌ Invalid Token!")
 
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.rerun()
