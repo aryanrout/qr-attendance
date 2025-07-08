@@ -1,9 +1,12 @@
+from datetime import date, datetime
 import streamlit as st
 import qrcode
 from PIL import Image
 import pandas as pd
-from datetime import date, datetime
+import io  # ✅ IMPORTANT!
 import os
+
+
 
 # 📂 CSV file setup
 csv_file = "attendance.csv"
@@ -22,6 +25,7 @@ def generate_qr():
     buf.seek(0)
     
     return buf, today_str
+
 
 
 # 🎛 Admin Panel (QR generator)
