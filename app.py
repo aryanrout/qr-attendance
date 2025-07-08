@@ -33,6 +33,8 @@ def generate_qr():
 # -------------------------------
 # 🧠 Main Logic Starts Here
 
+st.set_page_config(page_title="QR Attendance", page_icon="📚")
+
 st.title("📚 QR Attendance System with Login")
 
 # Session State for Login
@@ -52,7 +54,7 @@ if not st.session_state.logged_in:
             st.session_state.username = username
             st.session_state.role = users[username]["role"]
             st.success(f"Welcome, {username}!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid credentials.")
 
@@ -73,7 +75,7 @@ elif st.session_state.role == "teacher":
 
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
-        st.experimental_rerun()
+        st.rerun()
 
 # -------------------------------
 # Student Panel
@@ -102,4 +104,4 @@ elif st.session_state.role == "student":
 
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
-        st.experimental_rerun()
+        st.rerun()
